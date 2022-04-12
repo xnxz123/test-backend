@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="15">
+    <Properties>
+        <Property name="LOG_HOME">micro-logs/user</Property>
+        <property name="FILE_NAME">user</property>
+        <property name="PATTERNLAYOUT_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %F %C %M %L %-5level %msg%xEx%n</property>
+    </Properties>
+    <Appenders>
+        <Console name="consoleAppender" target="SYSTEM_OUT">
+            <!--<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>-->
+            <PatternLayout pattern="${PATTERNLAYOUT_PATTERN}" />
+        </Console>
+        <RollingRandomAccessFile name="debugfileAppender" fileName="${LOG_HOME}/debug/${FILE_NAME}-debug.log" filePattern="${LOG_HOME}/debug/${FILE_NAME}-debug%d{yyyy-MM-dd}_%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="info" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            </Filters>
+            <PatternLayout pattern="${PATTERNLAYOUT_PATTERN}" />
+            <!--<PatternLayout>-->
+                <!--<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>-->
+            <!--</PatternLayout>-->
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+        </RollingRandomAccessFile>
+        <RollingRandomAccessFile name="infofileAppender" fileName="${LOG_HOME}/info/${FILE_NAME}-info.log" filePattern="${LOG_HOME}/info/${FILE_NAME}-info%d{yyyy-MM-dd}_%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="warn" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <PatternLayout pattern="${PATTERNLAYOUT_PATTERN}" />
+            <!--<PatternLayout>-->
+                <!--<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>-->
+            <!--</PatternLayout>-->
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+        </RollingRandomAccessFile>
+        <RollingRandomAccessFile name="errorfileAppender" fileName="${LOG_HOME}/error/${FILE_NAME}-error.log" filePattern="${LOG_HOME}/error/${FILE_NAME}-error%d{yyyy-MM-dd}_%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <PatternLayout pattern="${PATTERNLAYOUT_PATTERN}" />
+            <!--<PatternLayout>-->
+                <!--<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>-->
+            <!--</PatternLayout>-->
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+        </RollingRandomAccessFile>
+        <SMTP name="Mail" subject="Error Log" to="wanglei@degnity.com" from="service@degnity.com" replyTo="service@degnity.com"
+              smtpProtocol="smtp" smtpHost="smtp.mxhichina.com" smtpPort="25" bufferSize="50" smtpDebug="false"
+              smtpPassword="Aa123456" smtpUsername="service@degnity.com">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+        </SMTP>
+        <!--配置异步写日志-->
+        <Async name="AsyncMail">
+            <AppenderRef ref="Mail"/>
+        </Async>
+    </Appenders>
+    <Loggers>
+        <logger name="org.springframework" level="info"  additivity="false"/>
+        <logger name="com.baicaiqiche.mapper" level="debug" additivity="true">
+            <AppenderRef ref="debugfileAppender"/>
+        </logger>
+        <Root level="info">
+            <AppenderRef ref="consoleAppender"/>
+            <AppenderRef ref="debugfileAppender"/>
+            <AppenderRef ref="infofileAppender"/>
+            <AppenderRef ref="errorfileAppender"/>
+            <!--prodd的时候开启-->
+            <!--<Appender-ref ref="AsyncMail"/>-->
+        </Root>
+    </Loggers>
+</Configuration>
